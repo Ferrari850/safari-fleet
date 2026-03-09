@@ -1160,6 +1160,7 @@ tbody td:first-child { color: var(--text); font-weight: 500; }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, query, where, orderBy, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
 // ======================== FIREBASE CONFIG ========================
 // 🔧 REPLACE WITH YOUR FIREBASE CONFIG
@@ -1285,6 +1286,7 @@ function isFirebaseConfigured() {
 if (isFirebaseConfigured()) {
   try {
     app = initializeApp(firebaseConfig);
+    try { window.__messaging = getMessaging(app); } catch(e) { console.log('Messaging init:', e.message); }
     auth = getAuth(app);
     db = getFirestore(app);
     onAuthStateChanged(auth, async (user) => {
@@ -1411,6 +1413,7 @@ function showApp() {
   setTimeout(() => {
     setupNavigation();
     subscribeNotifications();
+    registerPushNotifications();
     setTimeout(() => navigateTo('dashboard'), 50);
   }, 200);
 }
@@ -1796,11 +1799,8 @@ async function renderNewRequest() {
         <div style="display:flex;gap:8px;align-items:center">
           <select class="form-select" id="req-hour" style="flex:1">
             <option value="">Hour</option>
-            <option>06</option><option>07</option><option>08</option><option>09</option>
-            <option>10</option><option>11</option><option>12</option><option>13</option>
-            <option>14</option><option>15</option><option>16</option><option>17</option>
-            <option>18</option><option>19</option><option>20</option><option>21</option>
-            <option>22</option>
+            <option>08</option><option>09</option><option>10</option><option>11</option>
+            <option>12</option><option>13</option><option>14</option><option>15</option>
           </select>
           <span style="color:var(--text2);font-size:20px;font-weight:bold">:</span>
           <select class="form-select" id="req-minute" style="flex:1">
@@ -1851,6 +1851,10 @@ window.submitRequest = async function(data) {
   const reqHour = document.getElementById('req-hour') ? document.getElementById('req-hour').value : '';
   const reqMin = document.getElementById('req-minute') ? document.getElementById('req-minute').value : '';
   const time = (reqHour && reqMin) ? reqHour + ':' + reqMin : '';
+  const now = new Date();
+  const submittedDate = now.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const submittedTime = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const submittedAt = submittedDate + ' ' + submittedTime;
   const d = window._reqData || data;
 
   if (!cat) { showToast('Please select a vehicle category.', 'error'); return; }
@@ -1886,6 +1890,7 @@ window.submitRequest = async function(data) {
       submittedByName: currentUserData.name,
       submittedByDept: 'sales',
       createdAt: serverTimestamp(),
+      submittedAt: submittedAt,
       updatedAt: serverTimestamp(),
       garageReason: '',
       deptReason: '',
@@ -2032,6 +2037,7 @@ window.showRequestDetail = async function(reqId) {
         <div class="detail-row"><span class="detail-label">${t('vehicle_category')}</span><span class="detail-value"><span class="badge badge-${r.category}">${t(r.category)}</span></span></div>
         <div class="detail-row"><span class="detail-label">${t('vehicle_type')}</span><span class="detail-value">${r.vehicleType || '-'}</span></div>
         <div class="detail-row"><span class="detail-label">${t('time')}</span><span class="detail-value">${r.time || '-'}</span></div>
+        <div class="detail-row"><span class="detail-label">Submitted On</span><span class="detail-value">${r.submittedAt || '-'}</span></div>
         <div class="detail-row"><span class="detail-label">${t('status')}</span><span class="detail-value"><span class="badge badge-${r.status}">${t(r.status)}</span></span></div>
 
         <div class="divider"></div>
@@ -2299,6 +2305,41 @@ window.deleteUser = async function(id) {
 };
 
 // ======================== NOTIFICATIONS ========================
+// ======================== PUSH NOTIFICATIONS ========================
+async function registerPushNotifications() {
+  try {
+    if (!('Notification' in window)) return;
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') return;
+
+    if ('serviceWorker' in navigator) {
+      await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+    }
+
+    const token = await getToken(window.__messaging, {
+      vapidKey: 'BKIWoGcgHOkvgHy-P1gsFrXQrmuEdWgBW6ycIkLSM60uyDjIboT8JfTaw0FHU5bqUNN2UMwHDdPe6-V75KHdd-0'
+    });
+
+    if (token && currentUserData?.uid) {
+      await updateDoc(doc(db, 'staff', currentUserData.uid), { fcmToken: token });
+      console.log('FCM token saved:', token);
+    }
+
+    // Handle foreground messages
+    onMessage(window.__messaging, (payload) => {
+      const title = payload.notification?.title || 'Safari Fleet';
+      const body = payload.notification?.body || '';
+      showToast(title + ': ' + body, 'success');
+      // Also show browser notification
+      if (Notification.permission === 'granted') {
+        new Notification(title, { body, icon: '/favicon.ico' });
+      }
+    });
+  } catch(e) {
+    console.log('Push notification setup failed:', e.message);
+  }
+}
+
 async function addNotification(targetRole, message, type, refId = '') {
   try {
     await addDoc(collection(db, 'notifications'), {
