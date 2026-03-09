@@ -1,0 +1,2387 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0f0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Safari Fleet">
+<title>Safari Fleet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Tajawal:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #080c08;
+  --bg2: #0f150f;
+  --bg3: #161e16;
+  --border: #1e2a1e;
+  --border2: #263326;
+  --gold: #c8993a;
+  --gold2: #e8b84b;
+  --silver: #8da8a0;
+  --silver2: #adc8bf;
+  --green: #3a7a4a;
+  --green2: #4a9a5e;
+  --red: #7a3a3a;
+  --red2: #c05050;
+  --text: #e8ede8;
+  --text2: #9aaa9a;
+  --text3: #5a6a5a;
+  --accent: #c8993a;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'Tajawal', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --radius: 6px;
+  --radius2: 12px;
+  --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+[dir="rtl"] { --font-display: 'Tajawal', sans-serif; }
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Noise texture */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.4;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* ======================== LOGIN ======================== */
+#login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+#login-screen::after {
+  content: 'SAFARI FLEET';
+  position: absolute;
+  font-family: var(--font-display);
+  font-size: clamp(80px, 20vw, 220px);
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200,153,58,0.06);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  pointer-events: none;
+  letter-spacing: 0.05em;
+}
+
+.login-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius2);
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  z-index: 1;
+}
+
+.login-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.login-logo-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.login-logo-text {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 0.08em;
+  color: var(--text);
+}
+
+.login-subtitle {
+  font-size: 13px;
+  color: var(--text3);
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 8px;
+}
+
+.form-input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  transition: border-color var(--transition);
+  outline: none;
+}
+
+.form-input:focus { border-color: var(--gold); }
+.form-input::placeholder { color: var(--text3); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all var(--transition);
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  color: #0a0f0a;
+  width: 100%;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { border-color: var(--border2); color: var(--text); }
+
+.btn-danger {
+  background: rgba(192,80,80,0.15);
+  color: var(--red2);
+  border: 1px solid rgba(192,80,80,0.2);
+}
+.btn-danger:hover { background: rgba(192,80,80,0.25); }
+
+.btn-success {
+  background: rgba(74,154,94,0.15);
+  color: var(--green2);
+  border: 1px solid rgba(74,154,94,0.2);
+}
+.btn-success:hover { background: rgba(74,154,94,0.25); }
+
+.btn-sm { padding: 7px 14px; font-size: 12px; }
+
+.login-error {
+  color: var(--red2);
+  font-size: 12px;
+  margin-top: 12px;
+  text-align: center;
+  min-height: 18px;
+}
+
+/* LANG TOGGLE */
+.lang-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px;
+  gap: 2px;
+  z-index: 10000;
+}
+
+.lang-btn {
+  padding: 5px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--text3);
+  transition: all var(--transition);
+  font-family: var(--font-body);
+}
+
+.lang-btn.active {
+  background: var(--gold);
+  color: #0a0f0a;
+}
+
+/* ======================== APP LAYOUT ======================== */
+#app {
+  display: none;
+  min-height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 100vh;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  transition: transform var(--transition);
+}
+
+[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--border); }
+
+.sidebar-logo {
+  padding: 24px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-logo-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.sidebar-logo-text {
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 0.08em;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 12px;
+  overflow-y: auto;
+}
+
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding: 0 8px;
+  margin: 16px 0 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  color: var(--text2);
+  cursor: pointer;
+  transition: all var(--transition);
+  font-size: 14px;
+  position: relative;
+  user-select: none;
+}
+
+.nav-item:hover { background: var(--bg3); color: var(--text); }
+.nav-item.active { background: rgba(200,153,58,0.1); color: var(--gold); }
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: var(--gold);
+  border-radius: 2px;
+}
+[dir="rtl"] .nav-item.active::before { left: auto; right: 0; }
+
+.nav-icon { font-size: 16px; flex-shrink: 0; }
+
+.nav-badge {
+  margin-left: auto;
+  background: var(--gold);
+  color: #0a0f0a;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  min-width: 20px;
+  text-align: center;
+}
+[dir="rtl"] .nav-badge { margin-left: 0; margin-right: auto; }
+
+.sidebar-user {
+  padding: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.sidebar-user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.user-name { font-size: 13px; font-weight: 500; }
+.user-dept { font-size: 11px; color: var(--text3); }
+
+/* MAIN CONTENT */
+.main {
+  margin-left: 240px;
+  min-height: 100vh;
+  padding: 32px;
+}
+
+[dir="rtl"] .main { margin-left: 0; margin-right: 240px; }
+
+/* TOPBAR */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.page-title {
+  font-family: var(--font-display);
+  font-size: 36px;
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* NOTIFICATION BELL */
+.notif-bell {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all var(--transition);
+}
+
+.notif-bell:hover { border-color: var(--gold); }
+
+.notif-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  display: none;
+}
+
+.notif-dot.visible { display: block; animation: pulse 2s infinite; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.2); }
+}
+
+/* CARDS */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius2);
+  padding: 24px;
+}
+
+.card-title {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 16px;
+}
+
+/* STATS GRID */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius2);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+
+.stat-card.gold::before { background: linear-gradient(90deg, var(--gold), var(--gold2)); }
+.stat-card.silver::before { background: linear-gradient(90deg, var(--silver), var(--silver2)); }
+.stat-card.green::before { background: linear-gradient(90deg, var(--green), var(--green2)); }
+.stat-card.red::before { background: linear-gradient(90deg, var(--red), var(--red2)); }
+
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 42px;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text3);
+}
+
+/* BADGES */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.badge-pending { background: rgba(200,153,58,0.15); color: var(--gold2); }
+.badge-approved { background: rgba(74,154,94,0.15); color: var(--green2); }
+.badge-rejected { background: rgba(192,80,80,0.15); color: var(--red2); }
+.badge-cancelled { background: rgba(90,106,90,0.2); color: var(--text3); }
+.badge-gold { background: rgba(200,153,58,0.15); color: var(--gold2); }
+.badge-silver { background: rgba(141,168,160,0.15); color: var(--silver2); }
+
+/* TABLE */
+.table-wrap { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+thead th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  border-bottom: 1px solid var(--border);
+}
+
+[dir="rtl"] thead th { text-align: right; }
+
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
+  cursor: pointer;
+}
+
+tbody tr:hover { background: var(--bg3); }
+tbody tr:last-child { border-bottom: none; }
+
+tbody td { padding: 14px; color: var(--text2); }
+tbody td:first-child { color: var(--text); font-weight: 500; }
+
+/* GRID LAYOUT */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+
+/* AVAILABILITY PANEL */
+.avail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.avail-item {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  text-align: center;
+}
+
+.avail-count {
+  font-family: var(--font-display);
+  font-size: 36px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.avail-count.zero { color: var(--red2); }
+.avail-count.low { color: var(--gold); }
+.avail-count.ok { color: var(--green2); }
+
+.avail-type { font-size: 12px; color: var(--text3); }
+
+/* NUMBER INPUT with +/- */
+.num-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.num-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.num-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+.num-display {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  min-width: 40px;
+  text-align: center;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px 8px;
+  color: var(--text);
+}
+
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius2);
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalIn 0.2s ease;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+  padding: 24px 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title { font-family: var(--font-display); font-size: 24px; letter-spacing: 0.05em; }
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all var(--transition);
+}
+
+.modal-close:hover { color: var(--text); border-color: var(--border2); }
+.modal-body { padding: 24px; }
+
+/* TOAST */
+#toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 320px;
+}
+
+[dir="rtl"] #toast-container { right: auto; left: 24px; }
+
+.toast {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  font-size: 13px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  animation: toastIn 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.toast-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.toast-msg { line-height: 1.4; }
+
+.toast.success { border-left: 3px solid var(--green2); }
+.toast.error { border-left: 3px solid var(--red2); }
+.toast.info { border-left: 3px solid var(--gold); }
+
+/* NOTIF DRAWER */
+.notif-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 320px;
+  height: 100vh;
+  background: var(--bg2);
+  border-left: 1px solid var(--border);
+  z-index: 500;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  display: flex;
+  flex-direction: column;
+}
+
+[dir="rtl"] .notif-drawer {
+  right: auto;
+  left: 0;
+  border-left: none;
+  border-right: 1px solid var(--border);
+  transform: translateX(-100%);
+}
+
+.notif-drawer.open { transform: translateX(0); }
+
+.notif-drawer-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.notif-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.notif-item {
+  padding: 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  background: var(--bg3);
+  position: relative;
+}
+
+.notif-item.unread { border-color: var(--gold); }
+.notif-item.unread::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  right: 12px;
+  width: 6px;
+  height: 6px;
+  background: var(--gold);
+  border-radius: 50%;
+}
+[dir="rtl"] .notif-item.unread::before { right: auto; left: 12px; }
+
+.notif-time { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+/* SELECT */
+.form-select {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  transition: border-color var(--transition);
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a6a5a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+[dir="rtl"] .form-select {
+  background-position: left 12px center;
+  padding-right: 14px;
+  padding-left: 36px;
+}
+
+.form-select:focus { border-color: var(--gold); }
+.form-select option { background: var(--bg3); }
+
+/* TIME INPUT */
+.time-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* DIVIDER */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 20px 0;
+}
+
+/* EMPTY STATE */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text3);
+}
+
+.empty-state-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+.empty-state-text { font-size: 14px; }
+
+/* REQUEST DETAIL */
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.detail-row:last-child { border-bottom: none; }
+.detail-label { color: var(--text3); }
+.detail-value { color: var(--text); font-weight: 500; }
+
+/* APPROVAL FLOW */
+.approval-flow {
+  display: flex;
+  gap: 0;
+  margin: 16px 0;
+}
+
+.approval-step {
+  flex: 1;
+  padding: 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  text-align: center;
+  font-size: 12px;
+  position: relative;
+}
+
+.approval-step:not(:last-child)::after {
+  content: '→';
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text3);
+  z-index: 1;
+}
+
+[dir="rtl"] .approval-step:not(:last-child)::after { right: auto; left: -10px; content: '←'; }
+
+.approval-step:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+.approval-step:last-child { border-radius: 0 var(--radius) var(--radius) 0; }
+
+.approval-step.done { background: rgba(74,154,94,0.1); border-color: rgba(74,154,94,0.3); }
+.approval-step.rejected { background: rgba(192,80,80,0.1); border-color: rgba(192,80,80,0.3); }
+.approval-step.active { background: rgba(200,153,58,0.1); border-color: rgba(200,153,58,0.3); }
+
+.approval-step-label { font-weight: 500; color: var(--text); }
+.approval-step-status { color: var(--text3); margin-top: 2px; }
+
+/* DEPT COLORS */
+.dept-sales { color: #7eb8d4; }
+.dept-garage { color: #d49a7e; }
+.dept-gold { color: var(--gold2); }
+.dept-silver { color: var(--silver2); }
+
+/* TABS */
+.tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg3);
+  border-radius: var(--radius);
+  padding: 4px;
+  margin-bottom: 20px;
+}
+
+.tab {
+  flex: 1;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  color: var(--text3);
+  transition: all var(--transition);
+  border: none;
+  background: transparent;
+  font-family: var(--font-body);
+}
+
+.tab.active { background: var(--bg2); color: var(--text); }
+
+/* FILTER BAR */
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text3);
+  transition: all var(--transition);
+  font-family: var(--font-body);
+}
+
+.filter-chip:hover { border-color: var(--border2); color: var(--text); }
+.filter-chip.active { background: rgba(200,153,58,0.1); border-color: var(--gold); color: var(--gold); }
+
+/* LOADING */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* MOBILE */
+.hamburger {
+  display: none;
+  width: 40px;
+  height: 40px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 99;
+}
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  [dir="rtl"] .sidebar { transform: translateX(100%); }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-overlay.open { display: block; }
+  .main { margin-left: 0 !important; margin-right: 0 !important; padding: 20px 16px; }
+  .hamburger { display: flex; }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .page-title { font-size: 28px; }
+}
+
+/* SETUP NOTICE */
+.setup-notice {
+  background: rgba(200,153,58,0.08);
+  border: 1px solid rgba(200,153,58,0.2);
+  border-radius: var(--radius2);
+  padding: 20px;
+  margin-bottom: 24px;
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+.setup-notice strong { color: var(--gold); }
+
+/* Firebase config form */
+.config-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 600px) { .config-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- Stub globals so onclick attributes never throw before module loads -->
+<script>
+  // These will be replaced by the module once it initialises
+  function setLang(l) { window.__pendingLang = l; }
+  function doLogin() { window.__pendingLogin = true; }
+  function doLogout() {}
+  function navigateTo(p) { window.__pendingNav = p; }
+  function toggleSidebar() {}
+  function closeSidebar() {}
+  function toggleNotifDrawer() {}
+  function openModal() {}
+  function closeModal() {}
+  function showToast() {}
+  function changeNum(id, d) {
+    var el = document.getElementById(id);
+    if (el) el.value = Math.max(0, parseInt(el.value||0) + d);
+  }
+</script>
+
+<!-- LANGUAGE TOGGLE -->
+<div class="lang-toggle">
+  <button class="lang-btn active" onclick="setLang('en')">EN</button>
+  <button class="lang-btn" onclick="setLang('ar')">ع</button>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">🦁</div>
+      <div class="login-logo-text">SAFARI FLEET</div>
+    </div>
+    <p class="login-subtitle" data-i18n="login_subtitle">Vehicle Request Management System — Sharjah Safari</p>
+    <div class="form-group">
+      <label class="form-label" data-i18n="email">Email</label>
+      <input type="email" class="form-input" id="login-email" placeholder="you@sharjahsafari.ae" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label class="form-label" data-i18n="password">Password</label>
+      <input type="password" class="form-input" id="login-password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary" onclick="doLogin()" id="login-btn">
+      <span data-i18n="sign_in">Sign In</span>
+    </button>
+    <p class="login-error" id="login-error"></p>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">🦁</div>
+      <div class="sidebar-logo-text">SAFARI FLEET</div>
+    </div>
+
+    <div class="sidebar-nav" id="nav-items">
+      <!-- Generated by JS based on role -->
+    </div>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-info">
+        <div class="user-avatar" id="user-avatar"></div>
+        <div>
+          <div class="user-name" id="user-name-display"></div>
+          <div class="user-dept" id="user-dept-display"></div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="width:100%" onclick="doLogout()" data-i18n="sign_out">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
+        <h1 class="page-title" id="page-title">DASHBOARD</h1>
+      </div>
+      <div class="topbar-actions">
+        <div class="notif-bell" onclick="toggleNotifDrawer()" id="notif-bell">
+          🔔
+          <div class="notif-dot" id="notif-dot"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-content"></div>
+  </main>
+</div>
+
+<!-- NOTIFICATION DRAWER -->
+<div class="notif-drawer" id="notif-drawer">
+  <div class="notif-drawer-header">
+    <div style="font-family:var(--font-display);font-size:20px;letter-spacing:0.05em" data-i18n="notifications">NOTIFICATIONS</div>
+    <button class="modal-close" onclick="toggleNotifDrawer()">✕</button>
+  </div>
+  <div class="notif-list" id="notif-list">
+    <div class="empty-state">
+      <div class="empty-state-icon">🔔</div>
+      <div class="empty-state-text" data-i18n="no_notifs">No notifications yet</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<!-- TOAST -->
+<div id="toast-container"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, query, where, orderBy, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ======================== FIREBASE CONFIG ========================
+// 🔧 REPLACE WITH YOUR FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyDjWe25C9d11DF3doLdVqrQVmp6I4ZbVbo",
+  authDomain: "safari-fleet.firebaseapp.com",
+  projectId: "safari-fleet",
+  storageBucket: "safari-fleet.firebasestorage.app",
+  messagingSenderId: "780563344208",
+  appId: "1:780563344208:web:c9b8f4aa2eea92cfd0da55",
+  measurementId: "G-4E6QHK5TCT"
+};
+
+// ======================== INIT ========================
+let app, auth, db;
+let currentUser = null;
+let currentUserData = null;
+let unsubscribers = [];
+let notifications = [];
+let currentLang = 'en';
+let currentPage = 'dashboard';
+
+// i18n
+const i18n = {
+  en: {
+    login_subtitle: "Vehicle Request Management System — Sharjah Safari",
+    email: "Email", password: "Password", sign_in: "Sign In", sign_out: "Sign Out",
+    dashboard: "DASHBOARD", requests: "REQUESTS", new_request: "NEW REQUEST",
+    availability: "AVAILABILITY", manage_data: "MANAGE DATA", all_requests: "ALL REQUESTS",
+    notifications: "NOTIFICATIONS", no_notifs: "No notifications yet",
+    submit: "Submit", cancel: "Cancel", approve: "Approve", reject: "Reject",
+    vehicle_category: "Vehicle Category", vehicle_type: "Vehicle Type", time: "Pickup Time",
+    gold: "Gold", silver: "Silver", pending: "Pending", approved: "Approved",
+    rejected: "Rejected", cancelled: "Cancelled",
+    today_availability: "TODAY'S AVAILABILITY", vehicles: "Vehicles", guides: "Guides",
+    submit_availability: "Submit Availability", request_id: "Request ID",
+    submitted_by: "Submitted By", department: "Department", status: "Status",
+    garage_approval: "Garage", dept_approval: "Dept Approval", reason: "Reason for rejection",
+    no_requests: "No requests found", add_vehicle_type: "Add Vehicle Type",
+    add: "Add", type_name: "Type Name", category: "Category", actions: "Actions",
+    delete: "Delete", users: "Users", manage_users: "MANAGE USERS",
+    add_user: "Add User", name: "Name", role: "Role", dept: "Department",
+    manager: "Manager", sales: "Sales", garage: "Garage",
+    total_requests: "Total Requests", pending_requests: "Pending",
+    approved_today: "Approved Today", available_vehicles: "Available Vehicles",
+    setup_required: "Firebase Setup Required",
+    setup_msg: "To use Safari Fleet, please replace the Firebase config in the source code with your project credentials. See the setup guide below.",
+    request_details: "REQUEST DETAILS", cancel_request: "Cancel Request",
+    confirm_cancel: "Confirm Cancel", are_you_sure: "Are you sure you want to cancel this request?",
+    yes_cancel: "Yes, Cancel", keep_it: "Keep It",
+    rejection_reason: "Rejection Reason", enter_reason: "Enter reason...",
+    confirm_reject: "Confirm Rejection", availability_submitted: "Availability submitted successfully!",
+    request_submitted: "Request submitted!", request_cancelled: "Request cancelled.",
+    request_approved: "Request approved!", request_rejected: "Request rejected.",
+    no_vehicles_available: "No vehicles available for this type",
+    no_guides_available: "No guides available for this category",
+    both_approved: "Both departments approved — vehicle is ready!",
+    sales_notif_avail: "Garage has submitted today's availability. You can now make requests.",
+    filter_all: "All", filter_pending: "Pending", filter_approved: "Approved",
+    filter_rejected: "Rejected", loading: "Loading...",
+  },
+  ar: {
+    login_subtitle: "نظام طلبات المركبات — سفاري الشارقة",
+    email: "البريد الإلكتروني", password: "كلمة المرور", sign_in: "تسجيل الدخول", sign_out: "تسجيل الخروج",
+    dashboard: "لوحة التحكم", requests: "الطلبات", new_request: "طلب جديد",
+    availability: "التوفر اليومي", manage_data: "إدارة البيانات", all_requests: "جميع الطلبات",
+    notifications: "الإشعارات", no_notifs: "لا توجد إشعارات",
+    submit: "إرسال", cancel: "إلغاء", approve: "موافقة", reject: "رفض",
+    vehicle_category: "فئة المركبة", vehicle_type: "نوع المركبة", time: "وقت الاستلام",
+    gold: "ذهبي", silver: "فضي", pending: "قيد الانتظار", approved: "موافق عليه",
+    rejected: "مرفوض", cancelled: "ملغى",
+    today_availability: "التوفر اليوم", vehicles: "المركبات", guides: "المرشدون",
+    submit_availability: "إرسال التوفر", request_id: "رقم الطلب",
+    submitted_by: "مقدم من", department: "القسم", status: "الحالة",
+    garage_approval: "الجراج", dept_approval: "موافقة القسم", reason: "سبب الرفض",
+    no_requests: "لا توجد طلبات", add_vehicle_type: "إضافة نوع مركبة",
+    add: "إضافة", type_name: "اسم النوع", category: "الفئة", actions: "الإجراءات",
+    delete: "حذف", users: "المستخدمون", manage_users: "إدارة المستخدمين",
+    add_user: "إضافة مستخدم", name: "الاسم", role: "الدور", dept: "القسم",
+    manager: "مدير", sales: "المبيعات", garage: "الجراج",
+    total_requests: "إجمالي الطلبات", pending_requests: "قيد الانتظار",
+    approved_today: "موافق عليها اليوم", available_vehicles: "مركبات متاحة",
+    setup_required: "إعداد Firebase مطلوب",
+    setup_msg: "لاستخدام Safari Fleet، يرجى استبدال إعدادات Firebase في الكود المصدري ببيانات مشروعك.",
+    request_details: "تفاصيل الطلب", cancel_request: "إلغاء الطلب",
+    confirm_cancel: "تأكيد الإلغاء", are_you_sure: "هل أنت متأكد من إلغاء هذا الطلب؟",
+    yes_cancel: "نعم، إلغاء", keep_it: "الإبقاء عليه",
+    rejection_reason: "سبب الرفض", enter_reason: "أدخل السبب...",
+    confirm_reject: "تأكيد الرفض", availability_submitted: "تم إرسال التوفر بنجاح!",
+    request_submitted: "تم إرسال الطلب!", request_cancelled: "تم إلغاء الطلب.",
+    request_approved: "تمت الموافقة على الطلب!", request_rejected: "تم رفض الطلب.",
+    no_vehicles_available: "لا توجد مركبات متاحة لهذا النوع",
+    no_guides_available: "لا يوجد مرشدون متاحون لهذه الفئة",
+    both_approved: "وافق كلا القسمين — المركبة جاهزة!",
+    sales_notif_avail: "قدّم الجراج توفر اليوم. يمكنك الآن تقديم الطلبات.",
+    filter_all: "الكل", filter_pending: "قيد الانتظار", filter_approved: "موافق عليه",
+    filter_rejected: "مرفوض", loading: "جاري التحميل...",
+  }
+};
+
+function t(key) { return (i18n[currentLang] && i18n[currentLang][key]) || i18n.en[key] || key; }
+
+window.setLang = function(lang) {
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  const lb = document.querySelector(`[onclick="setLang('${lang}')"]`); if (lb) lb.classList.add('active');
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    el.textContent = t(key);
+  });
+  if (currentUserData) renderPage(currentPage);
+};
+
+// Replay any lang change that happened before module loaded
+if (window.__pendingLang) { window.setLang(window.__pendingLang); window.__pendingLang = null; }
+// ======================== FIREBASE INIT ========================
+function isFirebaseConfigured() {
+  return firebaseConfig.apiKey !== "YOUR_API_KEY";
+}
+
+if (isFirebaseConfigured()) {
+  try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const snap = await getDoc(doc(db, 'staff', user.uid));
+          if (snap.exists()) {
+            currentUser = user;
+            const rawData = snap.data();
+            // Log raw data to debug
+            console.log('RAW Firestore data:', JSON.stringify(rawData));
+            // Use Object.assign to copy all Firestore fields
+            // Parse by splitting JSON string - handles spaces in keys
+            const dataStr = JSON.stringify(snap.data());
+            function extractField(str, key) {
+              const idx = str.indexOf('"' + key);
+              if (idx === -1) return '';
+              const valStart = str.indexOf('"', str.indexOf(':', idx) + 1) + 1;
+              const valEnd = str.indexOf('"', valStart);
+              return str.substring(valStart, valEnd);
+            }
+            window.__userRole = extractField(dataStr, 'role');
+            console.log('Extracted role:', window.__userRole, 'from:', dataStr);
+            currentUserData = { 
+              uid: user.uid,
+              name: extractField(dataStr, 'name'),
+              email: extractField(dataStr, 'email'),
+              role: window.__userRole,
+              dept: extractField(dataStr, 'dept')
+            };
+            console.log('currentUserData after set:', JSON.stringify(currentUserData));
+            showApp();
+          } else {
+            showToast('User profile not found in Firestore.', 'error');
+            await signOut(auth);
+          }
+        } catch(e) {
+          console.error('Error loading user:', e);
+          showToast('Error loading user: ' + e.message, 'error');
+          showLogin();
+        }
+      } else {
+        showLogin();
+      }
+    });
+  } catch(e) {
+    console.error('Firebase init error:', e);
+    showDemoMode();
+  }
+} else {
+  showDemoMode();
+}
+
+// ======================== DEMO MODE ========================
+function showDemoMode() {
+  document.getElementById('login-screen').innerHTML = `
+    <div class="login-card" style="max-width:480px">
+      <div class="login-logo">
+        <div class="login-logo-icon">🦁</div>
+        <div class="login-logo-text">SAFARI FLEET</div>
+      </div>
+      <div class="setup-notice">
+        <strong>🔧 Firebase Setup Required</strong><br><br>
+        To activate Safari Fleet, you need to connect it to your Firebase project:<br><br>
+        <strong>1.</strong> Go to <a href="https://console.firebase.google.com" target="_blank" style="color:var(--gold)">console.firebase.google.com</a><br>
+        <strong>2.</strong> Create a new project named <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">safari-fleet</code><br>
+        <strong>3.</strong> Enable <strong>Authentication</strong> (Email/Password) and <strong>Firestore Database</strong><br>
+        <strong>4.</strong> Copy your Firebase config and replace the <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">firebaseConfig</code> object in this file<br>
+        <strong>5.</strong> Create your first user in Firebase Auth and add their profile to Firestore <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">users</code> collection<br><br>
+        <strong>Firestore User Document structure:</strong><br>
+        <pre style="background:var(--bg3);padding:12px;border-radius:6px;margin-top:8px;font-size:12px;overflow-x:auto">{
+  "name": "Your Name",
+  "email": "you@example.com",
+  "role": "manager",  // manager | sales | garage | gold | silver
+  "dept": "management",
+  "lang": "en"
+}</pre>
+      </div>
+      <p style="font-size:12px;color:var(--text3);text-align:center">Once Firebase is configured, reload this page to sign in.</p>
+    </div>
+  `;
+}
+
+// ======================== AUTH ========================
+window.doLogin = async function() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-error');
+  err.textContent = '';
+  btn.innerHTML = '<span class="spinner"></span>';
+  btn.disabled = true;
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch(e) {
+    err.textContent = e.code === 'auth/invalid-credential' ? 'Invalid email or password.' : e.message;
+    btn.innerHTML = `<span data-i18n="sign_in">${t('sign_in')}</span>`;
+    btn.disabled = false;
+  }
+};
+
+window.doLogout = async function() {
+  unsubscribers.forEach(u => u());
+  unsubscribers = [];
+  await signOut(auth);
+};
+
+// Enter key login
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') doLogin();
+});
+
+// ======================== APP INIT ========================
+function showLogin() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  initUserUI();
+  // Use longer delay to ensure everything is ready
+  setTimeout(() => {
+    setupNavigation();
+    subscribeNotifications();
+    setTimeout(() => navigateTo('dashboard'), 50);
+  }, 200);
+}
+
+function initUserUI() {
+  const u = currentUserData;
+  const initials = u.name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+  const colors = { manager: '#c8993a', sales: '#7eb8d4', garage: '#d49a7e', gold: '#c8993a', silver: '#8da8a0' };
+  const av = document.getElementById('user-avatar');
+  av.textContent = initials;
+  av.style.background = colors[u.role] || '#5a6a5a';
+  av.style.color = '#0a0f0a';
+  document.getElementById('user-name-display').textContent = u.name;
+  document.getElementById('user-dept-display').textContent = getDeptLabel(u.role);
+}
+
+function getDeptLabel(role) {
+  const map = { manager: 'App Manager', sales: 'Sales', garage: 'Garage', gold: 'Gold Dept', silver: 'Silver Dept' };
+  return map[role] || role;
+}
+
+// ======================== NAVIGATION ========================
+const navConfig = {
+  manager: [
+    { id: 'dashboard', icon: '📊', label: 'dashboard' },
+    { id: 'all_requests', icon: '📋', label: 'all_requests' },
+    { id: 'availability', icon: '🚗', label: 'availability', readonly: true },
+    { id: 'manage_data', icon: '⚙️', label: 'manage_data' },
+    { id: 'manage_users', icon: '👥', label: 'manage_users' },
+  ],
+  sales: [
+    { id: 'dashboard', icon: '📊', label: 'dashboard' },
+    { id: 'requests', icon: '📋', label: 'requests' },
+    { id: 'new_request', icon: '➕', label: 'new_request' },
+    { id: 'availability', icon: '🚗', label: 'availability', readonly: true },
+  ],
+  garage: [
+    { id: 'dashboard', icon: '📊', label: 'dashboard' },
+    { id: 'availability', icon: '🚗', label: 'availability' },
+    { id: 'all_requests', icon: '📋', label: 'all_requests' },
+  ],
+  gold: [
+    { id: 'dashboard', icon: '📊', label: 'dashboard' },
+    { id: 'availability', icon: '👤', label: 'availability' },
+    { id: 'all_requests', icon: '📋', label: 'all_requests' },
+  ],
+  silver: [
+    { id: 'dashboard', icon: '📊', label: 'dashboard' },
+    { id: 'availability', icon: '👤', label: 'availability' },
+    { id: 'all_requests', icon: '📋', label: 'all_requests' },
+  ],
+};
+
+function setupNavigation() {
+  const nav = document.getElementById('nav-items');
+  const role = window.__userRole || 'sales';
+  console.log('FINAL ROLE:', role, 'window.__userRole:', window.__userRole);
+  const items = navConfig[role] || navConfig.sales;
+  nav.innerHTML = items.map(item => `
+    <div class="nav-item" id="nav-${item.id}" onclick="navigateTo('${item.id}')">
+      <span class="nav-icon">${item.icon}</span>
+      <span data-i18n="${item.label}">${t(item.label)}</span>
+      ${item.id === 'all_requests' || item.id === 'requests' ? `<span class="nav-badge" id="badge-${item.id}" style="display:none">0</span>` : ''}
+    </div>
+  `).join('');
+}
+
+window.navigateTo = function(page) {
+  currentPage = page;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const navEl = document.getElementById(`nav-${page}`);
+  if (navEl) navEl.classList.add('active');
+  const titles = { dashboard: 'DASHBOARD', requests: t('requests').toUpperCase(), new_request: t('new_request').toUpperCase(), availability: t('availability').toUpperCase(), manage_data: t('manage_data').toUpperCase(), all_requests: t('all_requests').toUpperCase(), manage_users: t('manage_users').toUpperCase() };
+  document.getElementById('page-title').textContent = titles[page] || page.toUpperCase();
+  renderPage(page);
+  closeSidebar();
+};
+
+// ======================== PAGE RENDERER ========================
+async function renderPage(page) {
+  const content = document.getElementById('page-content');
+  content.innerHTML = `<div style="text-align:center;padding:60px;color:var(--text3)"><span class="spinner"></span></div>`;
+
+  switch(page) {
+    case 'dashboard': await renderDashboard(); break;
+    case 'requests': await renderMyRequests(); break;
+    case 'new_request': await renderNewRequest(); break;
+    case 'availability': await renderAvailability(); break;
+    case 'all_requests': await renderAllRequests(); break;
+    case 'manage_data': await renderManageData(); break;
+    case 'manage_users': await renderManageUsers(); break;
+    default: content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🚧</div><div>Coming soon</div></div>';
+  }
+}
+
+// ======================== DASHBOARD ========================
+async function renderDashboard() {
+  const content = document.getElementById('page-content');
+  const role = currentUserData.role;
+
+  // Get today's date string
+  const today = new Date().toISOString().split('T')[0];
+
+  // Fetch data
+  let reqs = [];
+  try {
+    let q;
+    if (role === 'sales') {
+      q = query(collection(db, 'requests'), where('submittedBy', '==', currentUserData.uid));
+    } else {
+      q = collection(db, 'requests');
+    }
+    const snap = await getDocs(q);
+    reqs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch(e) { console.error(e); }
+
+  const total = reqs.length;
+  const pending = reqs.filter(r => r.status === 'pending').length;
+  const approvedToday = reqs.filter(r => r.status === 'approved' && r.updatedAt?.toDate?.()?.toISOString?.()?.startsWith(today)).length;
+
+  // Get availability
+  let availVehicles = 0;
+  try {
+    const avSnap = await getDocs(collection(db, 'availability_vehicles'));
+    avSnap.forEach(d => { availVehicles += Object.values(d.data()).filter(v => typeof v === 'number').reduce((a,b) => a+b, 0); });
+  } catch(e) {}
+
+  // Recent requests
+  const recent = [...reqs].sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0)).slice(0, 5);
+
+  content.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card gold">
+        <div class="stat-value">${total}</div>
+        <div class="stat-label" data-i18n="total_requests">${t('total_requests')}</div>
+      </div>
+      <div class="stat-card silver">
+        <div class="stat-value">${pending}</div>
+        <div class="stat-label" data-i18n="pending_requests">${t('pending_requests')}</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-value">${approvedToday}</div>
+        <div class="stat-label" data-i18n="approved_today">${t('approved_today')}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--silver2)">${availVehicles}</div>
+        <div class="stat-label" data-i18n="available_vehicles">${t('available_vehicles')}</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Recent Requests</div>
+      ${recent.length === 0 ? `<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text" data-i18n="no_requests">${t('no_requests')}</div></div>` : `
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th data-i18n="request_id">${t('request_id')}</th>
+            <th data-i18n="vehicle_type">${t('vehicle_type')}</th>
+            <th data-i18n="vehicle_category">${t('vehicle_category')}</th>
+            <th data-i18n="time">${t('time')}</th>
+            <th data-i18n="status">${t('status')}</th>
+          </tr></thead>
+          <tbody>
+            ${recent.map(r => `
+              <tr onclick="showRequestDetail('${r.id}')">
+                <td>#${r.id.slice(-6).toUpperCase()}</td>
+                <td>${r.vehicleType || '-'}</td>
+                <td><span class="badge badge-${r.category}">${t(r.category)}</span></td>
+                <td>${r.time || '-'}</td>
+                <td><span class="badge badge-${r.status}">${t(r.status)}</span></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>`}
+    </div>
+  `;
+}
+
+// ======================== AVAILABILITY ========================
+async function renderAvailability() {
+  const content = document.getElementById('page-content');
+  const role = currentUserData.role;
+  const isReadonly = (role === 'manager' || role === 'sales');
+
+  // Fetch vehicle types from DB
+  let vehicleTypes = [];
+  try {
+    const snap = await getDocs(collection(db, 'vehicle_types'));
+    vehicleTypes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch(e) { console.error(e); }
+
+  // Fetch current availability
+  let currentVehicleAvail = {};
+  let currentGuideAvail = { gold: 0, silver: 0 };
+  try {
+    const vSnap = await getDocs(collection(db, 'availability_vehicles'));
+    vSnap.forEach(d => { currentVehicleAvail[d.id] = d.data(); });
+    const gSnap = await getDocs(collection(db, 'availability_guides'));
+    gSnap.forEach(d => { currentGuideAvail[d.id] = d.data().count || 0; });
+  } catch(e) { console.error(e); }
+
+  let html = `<div class="card" style="margin-bottom:20px">
+    <div class="card-title">${t('today_availability')} — ${t('vehicles')}</div>`;
+
+  if (role === 'garage' && !isReadonly) {
+    // Garage: submit vehicle availability
+    const goldTypes = vehicleTypes.filter(v => v.category === 'gold');
+    const silverTypes = vehicleTypes.filter(v => v.category === 'silver');
+
+    html += `<div style="margin-bottom:20px">
+      <div style="font-size:12px;font-weight:500;letter-spacing:0.08em;color:var(--gold2);text-transform:uppercase;margin-bottom:12px">🟡 ${t('gold')} ${t('vehicles')}</div>
+      ${goldTypes.length === 0 ? `<p style="color:var(--text3);font-size:13px">No gold vehicle types added yet.</p>` : goldTypes.map(v => `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:12px;background:var(--bg3);border-radius:var(--radius);border:1px solid var(--border)">
+          <span style="font-size:14px">${v.name}</span>
+          <div class="num-input-wrap">
+            <button class="num-btn" onclick="changeNum('veh_${v.id}', -1)">−</button>
+            <input class="num-display" type="number" id="veh_${v.id}" value="${(currentVehicleAvail[v.id] && currentVehicleAvail[v.id].count) || 0}" min="0" style="width:56px">
+            <button class="num-btn" onclick="changeNum('veh_${v.id}', 1)">+</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div>
+      <div style="font-size:12px;font-weight:500;letter-spacing:0.08em;color:var(--silver2);text-transform:uppercase;margin-bottom:12px">⚪ ${t('silver')} ${t('vehicles')}</div>
+      ${silverTypes.length === 0 ? `<p style="color:var(--text3);font-size:13px">No silver vehicle types added yet.</p>` : silverTypes.map(v => `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:12px;background:var(--bg3);border-radius:var(--radius);border:1px solid var(--border)">
+          <span style="font-size:14px">${v.name}</span>
+          <div class="num-input-wrap">
+            <button class="num-btn" onclick="changeNum('veh_${v.id}', -1)">−</button>
+            <input class="num-display" type="number" id="veh_${v.id}" value="${(currentVehicleAvail[v.id] && currentVehicleAvail[v.id].count) || 0}" min="0" style="width:56px">
+            <button class="num-btn" onclick="changeNum('veh_${v.id}', 1)">+</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <button class="btn btn-primary" style="margin-top:16px" onclick="submitVehicleAvailability(${JSON.stringify(vehicleTypes).replace(/"/g,'&quot;')})">${t('submit_availability')}</button>`;
+  } else {
+    // Readonly view
+    if (vehicleTypes.length === 0) {
+      html += `<div class="empty-state"><div class="empty-state-icon">🚗</div><div class="empty-state-text">No vehicle types configured yet.</div></div>`;
+    } else {
+      html += `<div class="avail-grid">
+        ${vehicleTypes.map(v => {
+          const count = (currentVehicleAvail[v.id] && currentVehicleAvail[v.id].count) || 0;
+          const cls = count === 0 ? 'zero' : count <= 1 ? 'low' : 'ok';
+          return `<div class="avail-item">
+            <div class="avail-count ${cls}">${count}</div>
+            <div class="avail-type">${v.name}</div>
+            <div style="margin-top:4px"><span class="badge badge-${v.category}" style="font-size:10px">${t(v.category)}</span></div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    }
+  }
+
+  html += `</div>`;
+
+  // Guides section
+  html += `<div class="card">
+    <div class="card-title">${t('today_availability')} — ${t('guides')}</div>`;
+
+  if ((role === 'gold' || role === 'silver') && !isReadonly) {
+    const myCategory = role;
+    html += `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px;background:var(--bg3);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:16px">
+        <div>
+          <div style="font-size:14px;font-weight:500;margin-bottom:4px">${t(myCategory)} ${t('guides')}</div>
+          <div style="font-size:12px;color:var(--text3)">Number of available guides today</div>
+        </div>
+        <div class="num-input-wrap">
+          <button class="num-btn" onclick="changeNum('guide_${myCategory}', -1)">−</button>
+          <input class="num-display" type="number" id="guide_${myCategory}" value="${currentGuideAvail[myCategory] || 0}" min="0" style="width:56px">
+          <button class="num-btn" onclick="changeNum('guide_${myCategory}', 1)">+</button>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="submitGuideAvailability('${myCategory}')">${t('submit_availability')}</button>`;
+  } else {
+    html += `<div class="avail-grid">
+      <div class="avail-item">
+        <div class="avail-count ${currentGuideAvail.gold === 0 ? 'zero' : currentGuideAvail.gold <= 1 ? 'low' : 'ok'}">${currentGuideAvail.gold || 0}</div>
+        <div class="avail-type">${t('gold')} ${t('guides')}</div>
+      </div>
+      <div class="avail-item">
+        <div class="avail-count ${currentGuideAvail.silver === 0 ? 'zero' : currentGuideAvail.silver <= 1 ? 'low' : 'ok'}">${currentGuideAvail.silver || 0}</div>
+        <div class="avail-type">${t('silver')} ${t('guides')}</div>
+      </div>
+    </div>`;
+  }
+
+  html += `</div>`;
+  content.innerHTML = html;
+}
+
+window.changeNum = function(id, delta) {
+  const input = document.getElementById(id);
+  if (!input) return;
+  const val = Math.max(0, parseInt(input.value || 0) + delta);
+  input.value = val;
+};
+
+window.submitVehicleAvailability = async function(vehicleTypes) {
+  try {
+    const batch = [];
+    for (const v of vehicleTypes) {
+      const inputEl = document.getElementById(`veh_${v.id}`);
+      const count = parseInt(inputEl?.value || 0);
+      batch.push(setDoc(doc(db, 'availability_vehicles', v.id), {
+        count, category: v.category, name: v.name, updatedAt: serverTimestamp(), submittedBy: currentUserData.uid
+      }));
+    }
+    await Promise.all(batch);
+    // Notify sales
+    await addNotification('sales', t('sales_notif_avail'), 'availability');
+    showToast(t('availability_submitted'), 'success');
+    renderAvailability();
+  } catch(e) {
+    showToast(e.message, 'error');
+  }
+};
+
+window.submitGuideAvailability = async function(category) {
+  try {
+    const count = parseInt(document.getElementById(`guide_${category}`)?.value || 0);
+    await setDoc(doc(db, 'availability_guides', category), {
+      count, updatedAt: serverTimestamp(), submittedBy: currentUserData.uid
+    });
+    showToast(t('availability_submitted'), 'success');
+  } catch(e) {
+    showToast(e.message, 'error');
+  }
+};
+
+// ======================== NEW REQUEST ========================
+async function renderNewRequest() {
+  const content = document.getElementById('page-content');
+
+  // Fetch vehicle types and availability
+  let vehicleTypes = [];
+  let vehicleAvail = {};
+  let guideAvail = {};
+  try {
+    const vtSnap = await getDocs(collection(db, 'vehicle_types'));
+    vehicleTypes = vtSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const vaSnap = await getDocs(collection(db, 'availability_vehicles'));
+    vaSnap.forEach(d => { vehicleAvail[d.id] = d.data().count || 0; });
+    const gaSnap = await getDocs(collection(db, 'availability_guides'));
+    gaSnap.forEach(d => { guideAvail[d.id] = d.data().count || 0; });
+  } catch(e) { console.error(e); }
+
+  const goldTypes = vehicleTypes.filter(v => v.category === 'gold');
+  const silverTypes = vehicleTypes.filter(v => v.category === 'silver');
+
+  // Build options with availability
+  const makeOptions = (types) => types.map(v => {
+    const count = vehicleAvail[v.id] || 0;
+    const disabled = count === 0 ? 'disabled' : '';
+    const label = count === 0 ? `${v.name} — ${t('no_vehicles_available')}` : `${v.name} (${count} available)`;
+    return `<option value="${v.id}" data-name="${v.name}" ${disabled}>${label}</option>`;
+  }).join('');
+
+  content.innerHTML = `
+    <div class="card" style="max-width:520px">
+      <div class="form-group">
+        <label class="form-label" data-i18n="vehicle_category">${t('vehicle_category')}</label>
+        <select class="form-select" id="req-category" onchange="onCategoryChange()">
+          <option value="">— Select Category —</option>
+          <option value="gold">${t('gold')}</option>
+          <option value="silver">${t('silver')}</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="type-group" style="display:none">
+        <label class="form-label" data-i18n="vehicle_type">${t('vehicle_type')}</label>
+        <select class="form-select" id="req-type">
+          <option value="">— Select Vehicle Type —</option>
+        </select>
+        <div id="guide-warning" style="color:var(--red2);font-size:12px;margin-top:6px;display:none"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" data-i18n="time">${t('time')}</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select class="form-select" id="req-hour" style="flex:1">
+            <option value="">Hour</option>
+            <option>06</option><option>07</option><option>08</option><option>09</option>
+            <option>10</option><option>11</option><option>12</option><option>13</option>
+            <option>14</option><option>15</option><option>16</option><option>17</option>
+            <option>18</option><option>19</option><option>20</option><option>21</option>
+            <option>22</option>
+          </select>
+          <span style="color:var(--text2);font-size:20px;font-weight:bold">:</span>
+          <select class="form-select" id="req-minute" style="flex:1">
+            <option value="">Min</option>
+            <option>00</option><option>15</option><option>30</option><option>45</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="submitRequest(${JSON.stringify({goldTypes, silverTypes, vehicleAvail, guideAvail}).replace(/"/g,'&quot;')})">${t('submit')}</button>
+    </div>
+  `;
+
+  window._reqData = { goldTypes, silverTypes, vehicleAvail, guideAvail };
+}
+
+window.onCategoryChange = function() {
+  const cat = document.getElementById('req-category').value;
+  const typeGroup = document.getElementById('type-group');
+  const typeSelect = document.getElementById('req-type');
+  const guideWarn = document.getElementById('guide-warning');
+  const d = window._reqData;
+
+  if (!cat) { typeGroup.style.display = 'none'; return; }
+  typeGroup.style.display = 'block';
+
+  const types = cat === 'gold' ? d.goldTypes : d.silverTypes;
+  typeSelect.innerHTML = `<option value="">— Select Vehicle Type —</option>` +
+    types.map(v => {
+      const count = d.vehicleAvail[v.id] || 0;
+      const disabled = count === 0 ? 'disabled' : '';
+      const label = count === 0 ? `${v.name} — Not available` : `${v.name} (${count} available)`;
+      return `<option value="${v.id}" data-name="${v.name}" ${disabled}>${label}</option>`;
+    }).join('');
+
+  const guideCount = d.guideAvail[cat] || 0;
+  if (guideCount === 0) {
+    guideWarn.textContent = `⚠️ ${t('no_guides_available')} (${t(cat)} dept)`;
+    guideWarn.style.display = 'block';
+  } else {
+    guideWarn.style.display = 'none';
+  }
+};
+
+window.submitRequest = async function(data) {
+  const cat = document.getElementById('req-category').value;
+  const typeId = document.getElementById('req-type').value;
+  const reqHour = document.getElementById('req-hour') ? document.getElementById('req-hour').value : '';
+  const reqMin = document.getElementById('req-minute') ? document.getElementById('req-minute').value : '';
+  const time = (reqHour && reqMin) ? reqHour + ':' + reqMin : '';
+  const d = window._reqData || data;
+
+  if (!cat) { showToast('Please select a vehicle category.', 'error'); return; }
+  if (!typeId) { showToast('Please select a vehicle type.', 'error'); return; }
+  if (!time) { showToast('Please select hour and minute.', 'error'); return; }
+
+  // Check guide availability
+  const guideCount = d.guideAvail[cat] || 0;
+  if (guideCount === 0) {
+    showToast(t('no_guides_available'), 'error');
+    return;
+  }
+
+  // Check vehicle availability
+  const vehCount = d.vehicleAvail[typeId] || 0;
+  if (vehCount === 0) {
+    showToast(t('no_vehicles_available'), 'error');
+    return;
+  }
+
+  const typeName = (cat === 'gold' ? d.goldTypes : d.silverTypes).find(v => v.id === typeId)?.name || typeId;
+
+  try {
+    const reqRef = await addDoc(collection(db, 'requests'), {
+      category: cat,
+      vehicleTypeId: typeId,
+      vehicleType: typeName,
+      time,
+      status: 'pending',
+      garageApproval: 'pending',
+      deptApproval: 'pending',
+      submittedBy: currentUserData.uid,
+      submittedByName: currentUserData.name,
+      submittedByDept: 'sales',
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      garageReason: '',
+      deptReason: '',
+    });
+
+    // Notify garage and relevant dept
+    await addNotification('garage', `New vehicle request: ${typeName} (${t(cat)}) at ${time}`, 'request', reqRef.id);
+    await addNotification(cat, `New ${t(cat)} vehicle request: ${typeName} at ${time}`, 'request', reqRef.id);
+
+    showToast(t('request_submitted'), 'success');
+    navigateTo('requests');
+  } catch(e) {
+    showToast(e.message, 'error');
+  }
+};
+
+// ======================== MY REQUESTS ========================
+async function renderMyRequests() {
+  const content = document.getElementById('page-content');
+  let reqs = [];
+  try {
+    const q = query(collection(db, 'requests'), where('submittedBy', '==', currentUserData.uid));
+    const snap = await getDocs(q);
+    reqs = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+  } catch(e) { console.error(e); }
+
+  renderRequestsTable(reqs, content);
+}
+
+// ======================== ALL REQUESTS ========================
+async function renderAllRequests() {
+  const content = document.getElementById('page-content');
+  let reqs = [];
+  try {
+    const snap = await getDocs(collection(db, 'requests'));
+    reqs = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+  } catch(e) { console.error(e); }
+
+  // Filter by dept for garage/gold/silver
+  const role = currentUserData.role;
+  if (role === 'garage') {
+    reqs = reqs.filter(r => r.garageApproval === 'pending' || r.status !== 'pending');
+  } else if (role === 'gold') {
+    reqs = reqs.filter(r => r.category === 'gold');
+  } else if (role === 'silver') {
+    reqs = reqs.filter(r => r.category === 'silver');
+  }
+
+  renderRequestsTable(reqs, content, true);
+}
+
+function renderRequestsTable(reqs, container, showApproveActions = false) {
+  const role = currentUserData.role;
+  const canApprove = showApproveActions && (role === 'garage' || role === 'gold' || role === 'silver' || role === 'manager');
+
+  let filterState = 'all';
+
+  function render() {
+    const filtered = filterState === 'all' ? reqs : reqs.filter(r => r.status === filterState);
+    container.innerHTML = `
+      <div class="filter-bar">
+        ${['all','pending','approved','rejected','cancelled'].map(f => `
+          <button class="filter-chip ${filterState===f?'active':''}" onclick="setFilter('${f}')">${t('filter_'+f) || f}</button>
+        `).join('')}
+      </div>
+      <div class="card">
+        ${filtered.length === 0 ? `<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">${t('no_requests')}</div></div>` : `
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>${t('request_id')}</th>
+              <th>${t('vehicle_type')}</th>
+              <th>${t('vehicle_category')}</th>
+              <th>${t('time')}</th>
+              ${role !== 'sales' ? `<th>${t('submitted_by')}</th>` : ''}
+              <th>${t('status')}</th>
+              ${canApprove ? `<th>${t('actions')}</th>` : ''}
+            </tr></thead>
+            <tbody>
+              ${filtered.map(r => `
+                <tr onclick="showRequestDetail('${r.id}')">
+                  <td>#${r.id.slice(-6).toUpperCase()}</td>
+                  <td>${r.vehicleType || '-'}</td>
+                  <td><span class="badge badge-${r.category}">${t(r.category)}</span></td>
+                  <td>${r.time || '-'}</td>
+                  ${role !== 'sales' ? `<td>${r.submittedByName || '-'}</td>` : ''}
+                  <td><span class="badge badge-${r.status}">${t(r.status)}</span></td>
+                  ${canApprove && r.status === 'pending' ? `
+                    <td onclick="event.stopPropagation()">
+                      ${role === 'garage' && r.garageApproval === 'pending' ? `
+                        <div style="display:flex;gap:6px">
+                          <button class="btn btn-success btn-sm" onclick="event.stopPropagation();approveRequest('${r.id}','garage')">${t('approve')}</button>
+                          <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();showRejectModal('${r.id}','garage')">${t('reject')}</button>
+                        </div>
+                      ` : role === 'gold' && r.category === 'gold' && r.deptApproval === 'pending' ? `
+                        <div style="display:flex;gap:6px">
+                          <button class="btn btn-success btn-sm" onclick="event.stopPropagation();approveRequest('${r.id}','dept')">${t('approve')}</button>
+                          <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();showRejectModal('${r.id}','dept')">${t('reject')}</button>
+                        </div>
+                      ` : role === 'silver' && r.category === 'silver' && r.deptApproval === 'pending' ? `
+                        <div style="display:flex;gap:6px">
+                          <button class="btn btn-success btn-sm" onclick="event.stopPropagation();approveRequest('${r.id}','dept')">${t('approve')}</button>
+                          <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();showRejectModal('${r.id}','dept')">${t('reject')}</button>
+                        </div>
+                      ` : `<span style="color:var(--text3);font-size:12px">—</span>`}
+                    </td>
+                  ` : canApprove ? `<td><span style="color:var(--text3);font-size:12px">—</span></td>` : ''}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>`}
+      </div>
+    `;
+
+    document.querySelectorAll('.filter-chip').forEach(c => {
+      c.onclick = () => { filterState = c.getAttribute('onclick').match(/'(\w+)'/)[1]; render(); };
+    });
+  }
+
+  window.setFilter = (f) => { filterState = f; render(); };
+  render();
+}
+
+// ======================== REQUEST DETAIL ========================
+window.showRequestDetail = async function(reqId) {
+  try {
+    const snap = await getDoc(doc(db, 'requests', reqId));
+    if (!snap.exists()) return;
+    const r = { id: snap.id, ...snap.data() };
+    const role = currentUserData.role;
+    const canCancelRole = role === 'sales' || role === 'manager';
+    const isCancellable = (r.status === 'pending') && canCancelRole;
+
+    const modal = document.getElementById('modal-content');
+    modal.innerHTML = `
+      <div class="modal-header">
+        <div class="modal-title">${t('request_details')}</div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-row"><span class="detail-label">${t('request_id')}</span><span class="detail-value">#${r.id.slice(-6).toUpperCase()}</span></div>
+        <div class="detail-row"><span class="detail-label">${t('submitted_by')}</span><span class="detail-value">${r.submittedByName || '-'}</span></div>
+        <div class="detail-row"><span class="detail-label">${t('vehicle_category')}</span><span class="detail-value"><span class="badge badge-${r.category}">${t(r.category)}</span></span></div>
+        <div class="detail-row"><span class="detail-label">${t('vehicle_type')}</span><span class="detail-value">${r.vehicleType || '-'}</span></div>
+        <div class="detail-row"><span class="detail-label">${t('time')}</span><span class="detail-value">${r.time || '-'}</span></div>
+        <div class="detail-row"><span class="detail-label">${t('status')}</span><span class="detail-value"><span class="badge badge-${r.status}">${t(r.status)}</span></span></div>
+
+        <div class="divider"></div>
+        <div style="font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:12px">Approval Flow</div>
+
+        <div class="approval-flow">
+          <div class="approval-step ${r.garageApproval === 'approved' ? 'done' : r.garageApproval === 'rejected' ? 'rejected' : 'active'}">
+            <div class="approval-step-label">🔧 ${t('garage_approval')}</div>
+            <div class="approval-step-status">${r.garageApproval === 'approved' ? '✓ Approved' : r.garageApproval === 'rejected' ? '✗ Rejected' : '⏳ Pending'}</div>
+            ${r.garageReason ? `<div style="font-size:11px;color:var(--red2);margin-top:4px">${r.garageReason}</div>` : ''}
+          </div>
+          <div class="approval-step ${r.deptApproval === 'approved' ? 'done' : r.deptApproval === 'rejected' ? 'rejected' : 'active'}">
+            <div class="approval-step-label">👤 ${t(r.category)} ${t('dept_approval')}</div>
+            <div class="approval-step-status">${r.deptApproval === 'approved' ? '✓ Approved' : r.deptApproval === 'rejected' ? '✗ Rejected' : '⏳ Pending'}</div>
+            ${r.deptReason ? `<div style="font-size:11px;color:var(--red2);margin-top:4px">${r.deptReason}</div>` : ''}
+          </div>
+        </div>
+
+        ${isCancellable ? `
+          <div class="divider"></div>
+          <button class="btn btn-danger" style="width:100%" onclick="confirmCancelRequest('${r.id}')">${t('cancel_request')}</button>
+        ` : ''}
+      </div>
+    `;
+    openModal();
+  } catch(e) { showToast(e.message, 'error'); }
+};
+
+window.confirmCancelRequest = async function(reqId) {
+  if (!confirm(t('are_you_sure'))) return;
+  try {
+    const snap = await getDoc(doc(db, 'requests', reqId));
+    const r = snap.data();
+    await updateDoc(doc(db, 'requests', reqId), { status: 'cancelled', updatedAt: serverTimestamp() });
+    // Restore availability
+    if (r.vehicleTypeId) {
+      const avDoc = await getDoc(doc(db, 'availability_vehicles', r.vehicleTypeId));
+      if (avDoc.exists()) {
+        await updateDoc(doc(db, 'availability_vehicles', r.vehicleTypeId), { count: (avDoc.data().count || 0) + 1 });
+      }
+    }
+    await addNotification('garage', `Request #${reqId.slice(-6).toUpperCase()} was cancelled by Sales.`, 'cancel', reqId);
+    showToast(t('request_cancelled'), 'info');
+    closeModal();
+    renderPage(currentPage);
+  } catch(e) { showToast(e.message, 'error'); }
+};
+
+// ======================== APPROVE/REJECT ========================
+window.approveRequest = async function(reqId, approver) {
+  try {
+    const snap = await getDoc(doc(db, 'requests', reqId));
+    const r = snap.data();
+    const updates = { updatedAt: serverTimestamp() };
+
+    if (approver === 'garage') {
+      updates.garageApproval = 'approved';
+    } else {
+      updates.deptApproval = 'approved';
+    }
+
+    // Check if both now approved
+    const newGarage = approver === 'garage' ? 'approved' : r.garageApproval;
+    const newDept = approver === 'dept' ? 'approved' : r.deptApproval;
+
+    if (newGarage === 'approved' && newDept === 'approved') {
+      updates.status = 'approved';
+      // Deduct availability
+      if (r.vehicleTypeId) {
+        const avDoc = await getDoc(doc(db, 'availability_vehicles', r.vehicleTypeId));
+        if (avDoc.exists()) {
+          await updateDoc(doc(db, 'availability_vehicles', r.vehicleTypeId), { count: Math.max(0, (avDoc.data().count || 0) - 1) });
+        }
+      }
+      if (r.category) {
+        const gDoc = await getDoc(doc(db, 'availability_guides', r.category));
+        if (gDoc.exists()) {
+          await updateDoc(doc(db, 'availability_guides', r.category), { count: Math.max(0, (gDoc.data().count || 0) - 1) });
+        }
+      }
+      await addNotification('sales', `✅ ${t('both_approved')} Request #${reqId.slice(-6).toUpperCase()}`, 'approved', reqId);
+    }
+
+    await updateDoc(doc(db, 'requests', reqId), updates);
+    showToast(t('request_approved'), 'success');
+    renderPage(currentPage);
+  } catch(e) { showToast(e.message, 'error'); }
+};
+
+window.showRejectModal = function(reqId, approver) {
+  const modal = document.getElementById('modal-content');
+  modal.innerHTML = `
+    <div class="modal-header">
+      <div class="modal-title">${t('confirm_reject')}</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">${t('rejection_reason')}</label>
+        <textarea class="form-input" id="reject-reason" placeholder="${t('enter_reason')}" rows="3" style="resize:none"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button class="btn btn-danger" style="flex:1" onclick="rejectRequest('${reqId}','${approver}')">${t('confirm_reject')}</button>
+        <button class="btn btn-ghost" onclick="closeModal()">${t('cancel')}</button>
+      </div>
+    </div>
+  `;
+  openModal();
+};
+
+window.rejectRequest = async function(reqId, approver) {
+  const reason = document.getElementById('reject-reason')?.value?.trim();
+  if (!reason) { showToast('Please enter a reason.', 'error'); return; }
+
+  try {
+    const updates = {
+      status: 'rejected',
+      updatedAt: serverTimestamp(),
+    };
+    if (approver === 'garage') {
+      updates.garageApproval = 'rejected';
+      updates.garageReason = reason;
+    } else {
+      updates.deptApproval = 'rejected';
+      updates.deptReason = reason;
+    }
+
+    await updateDoc(doc(db, 'requests', reqId), updates);
+    await addNotification('sales', `❌ Request #${reqId.slice(-6).toUpperCase()} was rejected. Reason: ${reason}`, 'rejected', reqId);
+    showToast(t('request_rejected'), 'info');
+    closeModal();
+    renderPage(currentPage);
+  } catch(e) { showToast(e.message, 'error'); }
+};
+
+// ======================== MANAGE DATA ========================
+async function renderManageData() {
+  const content = document.getElementById('page-content');
+  let vehicleTypes = [];
+  try {
+    const snap = await getDocs(collection(db, 'vehicle_types'));
+    vehicleTypes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch(e) { console.error(e); }
+
+  const goldTypes = vehicleTypes.filter(v => v.category === 'gold');
+  const silverTypes = vehicleTypes.filter(v => v.category === 'silver');
+
+  content.innerHTML = `
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title" style="color:var(--gold2)">🟡 ${t('gold')} — ${t('vehicles')}</div>
+        ${goldTypes.length === 0 ? `<p style="color:var(--text3);font-size:13px;margin-bottom:16px">No types yet.</p>` : `
+        <div style="margin-bottom:16px">
+          ${goldTypes.map(v => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:8px">
+              <span style="font-size:14px">${v.name}</span>
+              <button class="btn btn-danger btn-sm" onclick="deleteVehicleType('${v.id}')">${t('delete')}</button>
+            </div>
+          `).join('')}
+        </div>`}
+        <div style="display:flex;gap:8px">
+          <input type="text" class="form-input" id="new-gold-type" placeholder="${t('type_name')}...">
+          <button class="btn btn-primary btn-sm" style="white-space:nowrap" onclick="addVehicleType('gold')">${t('add')}</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="color:var(--silver2)">⚪ ${t('silver')} — ${t('vehicles')}</div>
+        ${silverTypes.length === 0 ? `<p style="color:var(--text3);font-size:13px;margin-bottom:16px">No types yet.</p>` : `
+        <div style="margin-bottom:16px">
+          ${silverTypes.map(v => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:8px">
+              <span style="font-size:14px">${v.name}</span>
+              <button class="btn btn-danger btn-sm" onclick="deleteVehicleType('${v.id}')">${t('delete')}</button>
+            </div>
+          `).join('')}
+        </div>`}
+        <div style="display:flex;gap:8px">
+          <input type="text" class="form-input" id="new-silver-type" placeholder="${t('type_name')}...">
+          <button class="btn btn-primary btn-sm" style="white-space:nowrap" onclick="addVehicleType('silver')">${t('add')}</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+window.addVehicleType = async function(category) {
+  const input = document.getElementById(`new-${category}-type`);
+  const name = input?.value?.trim();
+  if (!name) { showToast('Please enter a type name.', 'error'); return; }
+  try {
+    await addDoc(collection(db, 'vehicle_types'), { name, category, createdAt: serverTimestamp() });
+    input.value = '';
+    showToast(`${name} added!`, 'success');
+    renderManageData();
+  } catch(e) { showToast(e.message, 'error'); }
+};
+
+window.deleteVehicleType = async function(id) {
+  if (!confirm('Delete this vehicle type?')) return;
+  try {
+    await deleteDoc(doc(db, 'vehicle_types', id));
+    showToast('Deleted.', 'info');
+    renderManageData();
+  } catch(e) { showToast(e.message, 'error'); }
+};
+
+// ======================== MANAGE USERS ========================
+async function renderManageUsers() {
+  const content = document.getElementById('page-content');
+  let users = [];
+  try {
+    const snap = await getDocs(collection(db, 'staff'));
+    users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch(e) { console.error(e); }
+
+  const roleColors = { manager: '#c8993a', sales: '#7eb8d4', garage: '#d49a7e', gold: '#c8a93a', silver: '#8da8a0' };
+
+  content.innerHTML = `
+    <div class="card">
+      <div class="card-title">${t('users')}</div>
+      <div style="margin-bottom:20px;padding:16px;background:var(--bg3);border-radius:var(--radius);border:1px solid var(--border);font-size:12px;color:var(--text2);line-height:1.6">
+        <strong style="color:var(--gold)">ℹ️ Adding Users:</strong> Create users in Firebase Authentication console, then add their profile here in Firestore using their Auth UID as the document ID.
+        <br>Roles: <code>manager</code> | <code>sales</code> | <code>garage</code> | <code>gold</code> | <code>silver</code>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>${t('name')}</th>
+            <th>${t('email')}</th>
+            <th>${t('role')}</th>
+            <th>${t('actions')}</th>
+          </tr></thead>
+          <tbody>
+            ${users.map(u => `
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:32px;height:32px;border-radius:50%;background:${roleColors[u.role]||'#5a6a5a'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#0a0f0a;flex-shrink:0">${(u.name||'?').slice(0,2).toUpperCase()}</div>
+                    ${u.name || '-'}
+                  </div>
+                </td>
+                <td style="font-family:var(--font-mono);font-size:12px">${u.email || '-'}</td>
+                <td><span class="badge" style="background:${roleColors[u.role]||'#5a6a5a'}22;color:${roleColors[u.role]||'#5a6a5a'}">${u.role || '-'}</span></td>
+                <td>
+                  <button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')">${t('delete')}</button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+window.deleteUser = async function(id) {
+  if (id === currentUserData.uid) { showToast("Can't delete yourself.", 'error'); return; }
+  if (!confirm('Delete this user profile?')) return;
+  try {
+    await deleteDoc(doc(db, 'staff', id));
+    showToast('User deleted.', 'info');
+    renderManageUsers();
+  } catch(e) { showToast(e.message, 'error'); }
+};
+
+// ======================== NOTIFICATIONS ========================
+async function addNotification(targetRole, message, type, refId = '') {
+  try {
+    await addDoc(collection(db, 'notifications'), {
+      targetRole,
+      message,
+      type,
+      refId,
+      read: false,
+      createdAt: serverTimestamp()
+    });
+  } catch(e) { console.error('Notif error:', e); }
+}
+
+function subscribeNotifications() {
+  const role = currentUserData.role;
+  const q = query(
+    collection(db, 'notifications'),
+    where('targetRole', 'in', [role, 'all']),
+    orderBy('createdAt', 'desc')
+  );
+
+  const unsub = onSnapshot(q, (snap) => {
+    notifications = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const unread = notifications.filter(n => !n.read).length;
+    const dot = document.getElementById('notif-dot');
+    if (dot) dot.classList.toggle('visible', unread > 0);
+
+    const list = document.getElementById('notif-list');
+    if (!list) return;
+
+    if (notifications.length === 0) {
+      list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔔</div><div class="empty-state-text">${t('no_notifs')}</div></div>`;
+      return;
+    }
+
+    list.innerHTML = notifications.slice(0, 30).map(n => `
+      <div class="notif-item ${n.read ? '' : 'unread'}" onclick="markNotifRead('${n.id}')">
+        <div>${n.message}</div>
+        <div class="notif-time">${n.createdAt?.toDate?.()?.toLocaleString() || ''}</div>
+      </div>
+    `).join('');
+  });
+
+  unsubscribers.push(unsub);
+}
+
+window.markNotifRead = async function(id) {
+  try { await updateDoc(doc(db, 'notifications', id), { read: true }); } catch(e) {}
+};
+
+window.toggleNotifDrawer = function() {
+  const drawer = document.getElementById('notif-drawer');
+  drawer.classList.toggle('open');
+  // Mark all as read
+  if (drawer.classList.contains('open')) {
+    notifications.filter(n => !n.read).forEach(n => markNotifRead(n.id));
+  }
+};
+
+// ======================== MODAL ========================
+window.openModal = () => document.getElementById('modal-overlay').classList.add('open');
+window.closeModal = () => document.getElementById('modal-overlay').classList.remove('open');
+
+// ======================== TOAST ========================
+window.showToast = function(msg, type = 'info') {
+  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span class="toast-icon">${icons[type]}</span><span class="toast-msg">${msg}</span>`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+};
+
+// ======================== SIDEBAR ========================
+window.toggleSidebar = () => {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+};
+window.closeSidebar = () => {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+};
+
+</script>
+</body>
+</html>
